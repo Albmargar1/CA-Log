@@ -1,3 +1,11 @@
+##########
+# KEYS
+# Team draft 'A' or 'B'
+# Team lineup '-LA-' or '-LB-'
+# Player draft '-P0-', ..., '-P31-'
+# Player nº lineup '-nA0-', ..., '-nB16-'
+# Player team '-A0-', ..., '-B16-'
+
 def get_players():
     names = ['Abraham', 'Aguayo', 'Allou', 'Andersen', 'André Noruega',
              'Attah', 'Aziz', 'Baas', 'Baez', 'Bank', 'Barisic',
@@ -33,8 +41,12 @@ def get_draft_key_tab():
 
 
 def get_lineup_key_tab(team):
-    tab_list = [f'-n{team}{i}-' for i in range(16)]
+    tab_list = [f'-{team}{i}-' for i in range(1,17)]
     return tab_list
+
+
+def get_colors():
+    return ['#7aa7f0', '#f07a92']
 
 
 

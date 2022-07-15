@@ -10,7 +10,8 @@ def input_team(key, color):
                     justification='center',
                     default_text='',
                     expand_x=True,
-                    background_color=color)
+                    background_color=color,
+                    text_color = '#000000')
 
 
 def set_draft_background_color(draft_number, player_order, colors):
@@ -26,11 +27,12 @@ def input_player(draft_number, player_order, colors):
                     enable_events=True,
                     key=f'-P{4 * draft_number + player_order}-',
                     background_color=set_draft_background_color(draft_number, player_order, colors),
+                    text_color='#000000',
                     expand_x=True)
 
 
 def row_draft(i, colors):
-    return [sg.Text(f'Draft {i+1}'),
+    return [sg.Text(f'Draft {i+1}', text_color = '#000000'),
             input_player(i, 0, colors),
             input_player(i, 1, colors),
             input_player(i, 2, colors),
@@ -38,12 +40,12 @@ def row_draft(i, colors):
 
 
 def create_draft_layout(names, colors):
-    teams = [sg.Text('Teams'),
+    teams = [sg.Text('Teams', text_color = '#000000'),
              input_team('A', colors[0]),
              input_team('B', colors[1]),
              sg.Button(key='-SWAP-', button_text='First drafting team', button_color=colors[0])]
 
-    draft_layout = [[sg.Text('Draft', justification='center', expand_x=True)],
+    draft_layout = [[sg.Text('Draft', justification='center', text_color = '#000000', expand_x=True)],
                     teams,
                     row_draft(0, colors),
                     row_draft(1, colors),

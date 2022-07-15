@@ -82,7 +82,7 @@ while True:
 
     if event == 'Random team':
         for i in range(len(draft_tab)):
-            if i > 1:
+            if i > 1 and window[draft_tab[i]].get() == '':
                 window[draft_tab[i]].update(random.choice(names))
 
                 focus_element = window[draft_tab[i]]
@@ -100,24 +100,15 @@ while True:
     # Swap 2 players in lineup
     if '-A' in event or '-B' in event:
         pressed_buttons.append(event)
+        if len(pressed_buttons) == 1:
+            window[event].update(button_color=functions.swap_colors(definitions.get_colors_button()))
         if len(pressed_buttons) == 2:
-            functions.swap_players_button(pressed_buttons, window)
+            if ('-A' in pressed_buttons[0] and '-A' in pressed_buttons[1]) or (
+               '-B' in pressed_buttons[0] and '-B' in pressed_buttons[1]):
+                functions.swap_players_button(pressed_buttons, window)
 
+            window[pressed_buttons[0]].update(button_color=definitions.get_colors_button())
             pressed_buttons = []
-
-    #if event == '\r' and 0:
-    #    if '-nA' in element.key:
-    #        functions.swap_players('A', window)
-    #        functions.focus_next_element(window, A_tab)
-    #    elif '-nB' in element.key:
-    #        functions.swap_players('B', window)
-    #        functions.focus_next_element(window, B_tab)
-    #
-    #if 'Prior' in event:
-    #    if '-nA' in element.key:
-    #        functions.focus_next_element(window, A_tab, direction=-1)
-    #    elif '-nB' in element.key:
-    #        functions.focus_next_element(window, B_tab, direction=-1)
 
     ################
     ### Navigate ###

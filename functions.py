@@ -4,7 +4,7 @@ import re
 
 
 def swap_colors(colors):
-    return [colors[1], colors[0]]
+    return (colors[1], colors[0])
 
 
 def save_json(path, dic):

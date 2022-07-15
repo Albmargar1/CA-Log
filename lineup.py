@@ -9,16 +9,18 @@ def teams(key, color):
                    justification='center',
                    text='',
                    expand_x=True,
-                   background_color=color)
+                   background_color=color,
+                   text_color = '#000000')
 
 
 def draft_player_number(team, n):
-    return sg.Input(size=(2, 1),
-                    enable_events=True,
-                    key=f'-n{team}{n}-',
-                    default_text= n,
-                    background_color= '#6fe88c' if n <= 11 else sg.DEFAULT_INPUT_ELEMENTS_COLOR,
-                    expand_x=True)
+    return sg.Text(size=(2, 1),
+                   enable_events=True,
+                   key=f'-n{team}{n}-',
+                   text= n,
+                   #background_color = '#6fe88c' if n <= 11 else sg.DEFAULT_INPUT_ELEMENTS_COLOR,
+                   text_color = '#6fe88c' if n <= 11 else '#000000',
+                   expand_x=True)
 
 
 def draft_player_name(name, team, n):
@@ -26,7 +28,7 @@ def draft_player_name(name, team, n):
                      size=(16, 1),
                      key=f'-{team}{n}-',
                      expand_x=True,
-                     button_color=('#000000', '#FFFFFF'))
+                     button_color=definitions.get_colors_button())
 
 
 def row_players(i):
@@ -40,13 +42,12 @@ def create_lineup_layout(colors):
     teams_lineup = [teams('-LA-', colors[0]),
                     teams('-LB-', colors[1])]
 
+    row_players_title = [sg.Text('Nº', justification='center', text_color = '#000000'),
+                         sg.Text('Players', justification='center', text_color = '#000000', expand_x=True),
+                         sg.Text('Nº', justification='center', text_color = '#000000'),
+                         sg.Text('Players', justification='center', text_color = '#000000', expand_x=True)]
 
-    row_players_title = [sg.Text('Nº', justification='center'),
-                         sg.Text('Players', justification='center', expand_x=True),
-                         sg.Text('Nº', justification='center'),
-                         sg.Text('Players', justification='center', expand_x=True)]
-
-    lineup_layout = [[sg.Text('Lineup', justification='center', expand_x=True)],
+    lineup_layout = [[sg.Text('Lineup', justification='center', text_color = '#000000', expand_x=True)],
                      teams_lineup,
                      row_players_title,
                      row_players(1),

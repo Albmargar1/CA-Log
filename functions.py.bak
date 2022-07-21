@@ -316,8 +316,7 @@ def create_log_layout():
     multiline = [sg.Multiline(key='-LOG-',
                               size=(120, 10),
                               disabled=True,
-                              autoscroll=True),
-                              write_only=True]
+                              autoscroll=True)]
 
     layout = [[sg.Column(pass_actions + heading_actions),
                sg.Column(attacking_actions + defending_actions),

@@ -9,7 +9,7 @@ layout = [[sg.Button(button_text='Draft'),
            sg.Button(button_text='Log'),
            sg.Button(button_text='Exit')]]
 
-window = sg.Window('LOG', layout, no_titlebar=True)
+window = sg.Window('LOG', layout)
 
 while True:
     event, values = window.read()

@@ -2,6 +2,7 @@ import PySimpleGUI as sg
 import json
 import re
 import definitions
+import CustomElements
 
 
 def swap_colors(colors):
@@ -111,16 +112,6 @@ def swap_players_button(pressed_buttons, window):
     window[pressed_buttons[0]].update(text=new_button)
 
 
-def input_team(key, color):
-    return sg.Input(key=key,
-                    size=(10, 1),
-                    justification='center',
-                    default_text='',
-                    expand_x=True,
-                    background_color=color,
-                    text_color='#000000')
-
-
 def set_draft_background_color(draft_number, player_order, colors):
     if draft_number == 0:
         return colors[0] if player_order in (0, 1) else colors[1]
@@ -130,30 +121,43 @@ def set_draft_background_color(draft_number, player_order, colors):
 
 
 def input_player(draft_number, player_order, colors):
-    return sg.Input(size=(16, 1),
-                    enable_events=True,
-                    key=f'-P{4 * draft_number + player_order}-',
-                    background_color=set_draft_background_color(draft_number, player_order, colors),
-                    text_color='#000000',
-                    expand_x=True)
+    return CustomElements.cinput(key=f'-P{4 * draft_number + player_order}-',
+                                 background_color=set_draft_background_color(draft_number, player_order, colors),
+                                 size=(12, 1),
+                                 enable_events=True)
 
 
 def row_draft(i, colors):
-    return [sg.Text(f'Draft {i + 1}', text_color='#000000'),
+    text_element = sg.Text(text=f'Draft {i}', pad=((0,55), (0,0))) if i > 0 else \
+                   sg.Text(text='Goalkeepers')
+    return [text_element,
             input_player(i, 0, colors),
             input_player(i, 1, colors),
             input_player(i, 2, colors),
             input_player(i, 3, colors)]
 
 
-def create_draft_layout(names, colors):
-    teams = [sg.Text('Teams', text_color='#000000'),
-             input_team('A', colors[0]),
-             input_team('B', colors[1]),
-             sg.Button(key='-SWAP-', button_text='First drafting team', button_color=colors[0])]
+def create_draft_layout():
+    text = '1) Write both teams name.\n' \
+           '2) Select which team starts drafting.\n' \
+           '3) Write the player name on each draft box.\n' \
+           '    When only one player appears on the listbox, press enter.\n' \
+           '    Repeat until both teams are drafted.\n' \
 
-    draft_layout = [[sg.Text('Draft', justification='center', text_color='#000000', expand_x=True)],
+    names = definitions.get_players()
+    colors = definitions.get_colors_teams()
+
+    teams = [sg.Text('Teams', pad=((0,57), (0,0))),
+             CustomElements.cinput('A', background_color=colors[0], initial_focus=True),
+             CustomElements.cinput('B', background_color=colors[1]),
+             CustomElements.cbutton(text='1st draft',
+                                    key='-SWAP-',
+                                    color=colors[0])]
+
+    draft_layout = [[sg.Text('Draft', font='Arial 22', justification='center', expand_x=True)],
+                    [sg.Text(text)],
                     teams,
+                    [sg.Text(text='')],
                     row_draft(0, colors),
                     row_draft(1, colors),
                     row_draft(2, colors),
@@ -162,8 +166,16 @@ def create_draft_layout(names, colors):
                     row_draft(5, colors),
                     row_draft(6, colors),
                     row_draft(7, colors),
-                    [sg.Listbox(names, size=(20, 6), enable_events=True, key='-LIST-', font='18')],
-                    [sg.Button('Random team'), sg.Button('Exit')]]
+                    [sg.Text(text='')],
+                    [sg.Listbox(names,
+                                size=(12, 6),
+                                enable_events=True,
+                                key='-LIST-',
+                                expand_x=True)],
+                    [sg.Text('')],
+                    [CustomElements.cbutton('Random team', size=(12,1)),
+                     CustomElements.cbutton('Erase a player', size=(12,1)),
+                     CustomElements.cbutton('Exit')]]
 
     return draft_layout
 
@@ -178,45 +190,47 @@ def teams(key, color):
                    text_color='#000000')
 
 
-def draft_player_number(team, n):
-    return sg.Text(size=(2, 1),
-                   enable_events=True,
-                   key=f'-n{team}{n}-',
-                   text=n,
-                   # background_color = '#6fe88c' if n <= 11 else sg.DEFAULT_INPUT_ELEMENTS_COLOR,
-                   text_color='#6fe88c' if n <= 11 else '#000000',
-                   expand_x=True)
-
-
-def draft_player_name(name, team, n):
-    return sg.Button(button_text='',
-                     size=(16, 1),
-                     key=f'-{team}{n}-',
-                     expand_x=True,
-                     button_color=definitions.get_colors_button())
-
-
 def row_players(i):
-    return [draft_player_number('A', i),
-            draft_player_name(i, 'A', i),
-            draft_player_number('B', i),
-            draft_player_name(i, 'B', i)]
+    text_color='#FFFFFF' if i <= 11 else definitions.get_colors_teams()[1]
+
+    return [sg.Text(i, key=f'-nA{i}-', size=(2,1), text_color=text_color),
+            sg.Button(button_text='',
+                      key=f'-A{i}-',
+                      size=(12,1),
+                      button_color=definitions.get_colors_button_A(),
+                      expand_x=True),
+            sg.Text(i, key=f'-nB{i}-', size=(2,1), text_color=text_color),
+            sg.Button(button_text='',
+                      key=f'-B{i}-',
+                      size=(12, 1),
+                      button_color=definitions.get_colors_button_B(),
+                      expand_x=True)]
 
 
-def create_lineup_layout(colors, erase_player=False):
-    teams_lineup = [teams('-LA-', colors[0]),
-                    teams('-LB-', colors[1])]
+def create_lineup_layout(text):
 
-    row_players_title = [sg.Text('Nº', justification='center', text_color='#000000'),
-                         sg.Text('Players', justification='center', text_color='#000000', expand_x=True),
-                         sg.Text('Nº', justification='center', text_color='#000000'),
-                         sg.Text('Players', justification='center', text_color='#000000', expand_x=True)]
+    top = [sg.Text('Lineup', font='Arial 22', justification='center', expand_x=True)]
 
-    top = [sg.Text('Lineup', justification='center', text_color='#000000', expand_x=True)]
-    if erase_player:
-        top += [sg.Button(key='-ERASE-', button_text='Erase a player')]
+    teams_lineup = [sg.Text(text='',
+                            key='-LA-',
+                            background_color=definitions.get_colors_teams()[0],
+                            expand_x=True,
+                            justification='center',
+                            size=(10,1)),
+                    sg.Text(text='',
+                            key='-LB-',
+                            background_color=definitions.get_colors_teams()[1],
+                            expand_x=True,
+                            justification='center',
+                            size=(10,1))]
+
+    row_players_title = [sg.Text('Nº', justification='center'),
+                         sg.Text('Players', justification='center', expand_x=True),
+                         sg.Text('Nº', justification='center'),
+                         sg.Text('Players', justification='center', expand_x=True)]
 
     lineup_layout = [top,
+                     [sg.Text(text)],
                      teams_lineup,
                      row_players_title,
                      row_players(1),
@@ -262,9 +276,7 @@ def load_lineup_json(filename, window):
 
 def action_buttons(text, key):
     return sg.Button(button_text=text,
-                     auto_size_button=True,
-                     size=(16, 1),
-                     font='Arial 12',
+                     size=(14, 1),
                      key=key)
 
 
@@ -275,7 +287,6 @@ def action_text(text):
 def option_button(text, key, pad):
     return sg.Button(button_text=text,
                      size=(12, 1),
-                     font='Arial 12',
                      pad=((0, pad), (0, 0)),
                      key=key)
 
@@ -335,7 +346,7 @@ def create_log_layout():
                option_button('Submit', 'Submit', 0)]
 
     multiline = [sg.Multiline(key='-LOG-',
-                              size=(120, 10),
+                              size=(80, 10),
                               disabled=True,
                               autoscroll=True,
                               write_only=True)]
@@ -371,19 +382,27 @@ def update_action_buttons_color(window, event):
     if (event == '-CLP-') or (event == '-CSH-') or (event == '-CSN-') or (event == '-CCP-') or (
             event == '-CIP-') or (event == '-CDS-') or (event == '-CSB-') or (event == '-CKB-') or (
             event == '-CHB-'):
-        set_action_buttons_color(window, colors[0], colors[2], colors[0])
+        set_action_buttons_color(window, colors[0], colors[1], colors[0])
+        update_button_text(window['Agent'], 'Pick a player')
+        update_button_text(window['Recipient'], '')
         update_button_text(window['Result'], 'Success')
 
     elif (event == '-CHS-') or (event == '-CDB-') or (event == '-CPB-') or (
             event == '-CSP-') or (event == '-CFP-') or (event == '-CHE-'):
-        set_action_buttons_color(window, colors[0], colors[2], colors[1])
+        set_action_buttons_color(window, colors[0], colors[1], colors[1])
+        update_button_text(window['Agent'], 'Pick a player')
+        update_button_text(window['Recipient'], '')
         update_button_text(window['Result'], '')
 
     elif (event == '-CMP-') or (event == '-CLB-') or (event == '-CHC-') or (event == '-CCK-') or (
             event == '-CTI-') or (event == '-CFK-') or (event == '-CPE-'):
-        set_action_buttons_color(window, colors[2], colors[2], colors[1])
+        set_action_buttons_color(window, colors[1], colors[1], colors[1])
+        update_button_text(window['Agent'], '')
+        update_button_text(window['Recipient'], '')
         update_button_text(window['Result'], '')
 
     else:
         set_action_buttons_color(window, colors[0], colors[0], colors[0])
+        update_button_text(window['Agent'], 'Pick a player')
+        update_button_text(window['Recipient'], 'Pick a player')
         update_button_text(window['Result'], 'Success')

@@ -45,16 +45,20 @@ def get_lineup_key_tab(team):
     return tab_list
 
 
-def get_colors():
-    return ['#7aa7f0', '#f07a92']
+def get_colors_teams():
+    return ['#357fb0', '#a14054']
 
 
-def get_colors_button():
-    return ('#000000', '#FFFFFF')
+def get_colors_button_A():
+    return ('#FFFFFF', get_colors_teams()[0])
+
+
+def get_colors_button_B():
+    return ('#FFFFFF', get_colors_teams()[1])
 
 
 def get_colors_options_buttons():
-    return ('#348ceb', '#65f077', '#eb4c34')
+    return ('#348ceb', get_colors_teams()[1], '#eb4c34')
 
 
 
